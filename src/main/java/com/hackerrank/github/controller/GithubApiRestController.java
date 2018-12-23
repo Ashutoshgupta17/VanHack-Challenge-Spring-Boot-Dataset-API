@@ -121,3 +121,37 @@ public class GithubApiRestController {
         Actor actorUpdated = actorRepository.save(actor);
         return ResponseEntity.ok(ActorDTO.convertFrom(actorUpdated));
     }
+
+    @GetMapping(value = "/actors")
+    public ResponseEntity<List<ActorDTO>> getActors() {
+        List<Event> events = eventRepository.findAll();
+        List<Actor> actors = actorRepository.findAll();
+
+        List<ActorTuple> actorTuples = new ArrayList<>();
+
+        for (Actor actor : actors) {
+            List<Event> collect = events.stream()
+                    .filter(event -> event.getActor().equals(actor))
+                    .sorted(Comparator.comparing(Event::getCreatedAt).reversed())
+                    .collect(Collectors.toList());
+            if (!collect.isEmpty()) {
+                actorTuples.add(new ActorTuple(actor, collect.size(), collect.get(0).getCreatedAt()));
+            }
+        }
+
+        List<ActorDTO> actorList = getCollectionWithCriteria(actorTuples);
+
+        return ResponseEntity.ok(actorList);
+    }
+
+
+    private List<ActorDTO> getCollectionWithCriteria(List<ActorTuple> actorTuples) {
+        return actorTuples.stream()
+                .sorted(Comparator.comparing(o -> o.getActor().getLogin()))
+                .sorted(Comparator.comparing(ActorTuple::getLast).reversed())
+                .sorted(Comparator.comparing(ActorTuple::getCEvents).reversed())
+                .map(ActorTuple::getActor)
+                .map(ActorDTO::convertFrom)
+                .collect(Collectors.toList());
+    }
+}
