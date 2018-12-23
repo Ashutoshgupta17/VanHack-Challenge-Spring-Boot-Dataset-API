@@ -89,4 +89,20 @@ public class GithubApiRestController {
                                 .collect(Collectors.toList())
                 );
     }
+
+    @GetMapping(value = "/events/actors/{actorID}", produces = "application/json")
+    public ResponseEntity<List<EventDTO>> getAllEventsByActorId(@PathVariable Long actorID) {
+        Actor actor = actorRepository.findOne(actorID);
+        if (isNull(actor)) {
+            return ResponseEntity.notFound().build();
+        }
+        List<Event> events = eventRepository.findAllByActorIdOrderByIdAsc(actorID);
+
+        return events.isEmpty() ?
+                ResponseEntity.ok(new ArrayList<>()) :
+                ResponseEntity.ok(
+                        events.stream()
+                                .map(EventDTO::convertFrom)
+                                .collect(Collectors.toList())
+                );
     }
