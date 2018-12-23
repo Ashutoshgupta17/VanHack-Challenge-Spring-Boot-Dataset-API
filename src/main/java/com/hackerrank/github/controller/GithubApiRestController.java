@@ -144,6 +144,48 @@ public class GithubApiRestController {
         return ResponseEntity.ok(actorList);
     }
 
+    @GetMapping(value = "/actors/streak")
+    public ResponseEntity<List<ActorDTO>> getActorsStreak() {
+        List<Event> events = eventRepository.findAll();
+        List<Actor> actors = actorRepository.findAll();
+
+        List<ActorTuple> actorTupleStreaks = new ArrayList<>();
+
+        for (Actor actor : actors) {
+            List<Event> collect = events.stream()
+                    .filter(event -> event.getActor().equals(actor) && event.getType().equals("PushEvent"))
+                    .sorted(Comparator.comparing(Event::getCreatedAt).reversed())
+                    .collect(Collectors.toList());
+
+            if (!collect.isEmpty()) {
+                if (collect.size() == 1) {
+                    actorTupleStreaks.add(new ActorTuple(actor, 0, collect.get(0).getCreatedAt()));
+                } else {
+                    Integer mayorStreak = getStreak(collect);
+                    actorTupleStreaks.add(new ActorTuple(actor, mayorStreak, collect.get(0).getCreatedAt()));
+                }
+            }
+        }
+        List<ActorDTO> actorList = getCollectionWithCriteria(actorTupleStreaks);
+        return ResponseEntity.ok(actorList);
+    }
+
+    private Integer getStreak(List<Event> collect) {
+        Integer mayorStreak = 0;
+        Integer streak = 0;
+        for (int i = collect.size() - 1; i > 0; i--) {
+            LocalDateTime currentDate = collect.get(i).getCreatedAt().toLocalDateTime();
+            LocalDateTime nextDate = collect.get(i - 1).getCreatedAt().toLocalDateTime();
+            if (currentDate.plusDays(1).isBefore(nextDate)) {
+                streak = 0;
+            } else {
+                streak++;
+                if (streak > mayorStreak)
+                    mayorStreak = streak;
+            }
+        }
+        return mayorStreak;
+    }
 
     private List<ActorDTO> getCollectionWithCriteria(List<ActorTuple> actorTuples) {
         return actorTuples.stream()
