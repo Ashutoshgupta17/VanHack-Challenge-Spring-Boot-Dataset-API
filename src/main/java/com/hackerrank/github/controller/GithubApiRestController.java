@@ -46,7 +46,6 @@ public class GithubApiRestController {
     public ResponseEntity deleteEvents() {
         eventRepository.deleteAll();
         actorRepository.deleteAll();
-        repoRepository.deleteAll();
         return ResponseEntity.ok().build();
     }
 
@@ -109,7 +108,7 @@ public class GithubApiRestController {
                 );
     }
 
-    @PutMapping(value = "/actors", produces = "application/json")
+    @PutMapping(value = "/actors")
     public ResponseEntity<ActorDTO> updateActorAvatarURL(@RequestBody ActorDTO body) {
         Actor actor = actorRepository.findOne(body.getId());
 
@@ -124,7 +123,7 @@ public class GithubApiRestController {
         return ResponseEntity.ok(ActorDTO.convertFrom(actorUpdated));
     }
 
-    @GetMapping(value = "/actors", produces = "application/json")
+    @GetMapping(value = "/actors")
     public ResponseEntity<List<ActorDTO>> getActors() {
         List<Event> events = eventRepository.findAll();
         List<Actor> actors = actorRepository.findAll();
