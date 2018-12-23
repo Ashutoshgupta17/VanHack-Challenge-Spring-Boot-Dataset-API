@@ -146,7 +146,7 @@ public class GithubApiRestController {
         return ResponseEntity.ok(actorList);
     }
 
-    @GetMapping(value = "/actors/streak", produces = "application/json")
+    @GetMapping(value = "/actors/streak")
     public ResponseEntity<List<ActorDTO>> getActorsStreak() {
         List<Event> events = eventRepository.findAll();
         List<Actor> actors = actorRepository.findAll();
