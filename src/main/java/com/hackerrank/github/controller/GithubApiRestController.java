@@ -76,4 +76,17 @@ public class GithubApiRestController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
+    @GetMapping(value = "/events", produces = "application/json")
+    public ResponseEntity<List<EventDTO>> getAllEvents() {
+
+        List<Event> events = eventRepository.findAll(new Sort(Sort.Direction.ASC, "id"));
+
+        return events.isEmpty() ?
+                ResponseEntity.ok(new ArrayList<>()) :
+                ResponseEntity.ok(
+                        events.stream()
+                                .map(EventDTO::convertFrom)
+                                .collect(Collectors.toList())
+                );
+    }
     }
