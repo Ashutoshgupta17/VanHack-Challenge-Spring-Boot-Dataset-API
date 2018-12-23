@@ -109,7 +109,7 @@ public class GithubApiRestController {
                 );
     }
 
-    @PutMapping(value = "/actors")
+    @PutMapping(value = "/actors", produces = "application/json")
     public ResponseEntity<ActorDTO> updateActorAvatarURL(@RequestBody ActorDTO body) {
         Actor actor = actorRepository.findOne(body.getId());
 
