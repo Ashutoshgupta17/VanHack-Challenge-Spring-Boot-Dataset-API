@@ -45,7 +45,7 @@ public class GithubApiRestController {
     @DeleteMapping(value = "/erase")
     public ResponseEntity deleteEvents() {
         eventRepository.deleteAll();
-
+        actor
         return ResponseEntity.ok().build();
     }
 
