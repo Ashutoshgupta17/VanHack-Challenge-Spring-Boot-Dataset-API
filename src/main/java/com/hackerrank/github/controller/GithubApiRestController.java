@@ -46,7 +46,7 @@ public class GithubApiRestController {
     public ResponseEntity deleteEvents() {
         eventRepository.deleteAll();
         actorRepository.deleteAll();
-        repoRepository
+        repoRepository.deleteAll
         return ResponseEntity.ok().build();
     }
 
