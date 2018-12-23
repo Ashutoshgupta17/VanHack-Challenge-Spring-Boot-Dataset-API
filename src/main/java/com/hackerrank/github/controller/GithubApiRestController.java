@@ -79,7 +79,8 @@ public class GithubApiRestController {
     @GetMapping(value = "/events", produces = "application/json")
     public ResponseEntity<List<EventDTO>> getAllEvents() {
 
-        List<Event> events = eventRepository.findAll(new Sort(Sort.Direction.ASC, "id"));
+        List<Event> events = new ArrayList<>();
+        events = eventRepository.findAll(new Sort(Sort.Direction.ASC, "id"));
 
         return events.isEmpty() ?
                 ResponseEntity.ok(new ArrayList<>()) :
@@ -96,7 +97,8 @@ public class GithubApiRestController {
         if (isNull(actor)) {
             return ResponseEntity.notFound().build();
         }
-        List<Event> events = eventRepository.findAllByActorIdOrderByIdAsc(actorID);
+        List<Event> events = new ArrayList<>();
+        events = eventRepository.findAllByActorIdOrderByIdAsc(actorID);
 
         return events.isEmpty() ?
                 ResponseEntity.ok(new ArrayList<>()) :
@@ -107,7 +109,7 @@ public class GithubApiRestController {
                 );
     }
 
-    @PutMapping(value = "/actors")
+    @PutMapping(value = "/actors", produces = "application/json")
     public ResponseEntity<ActorDTO> updateActorAvatarURL(@RequestBody ActorDTO body) {
         Actor actor = actorRepository.findOne(body.getId());
 
@@ -122,7 +124,7 @@ public class GithubApiRestController {
         return ResponseEntity.ok(ActorDTO.convertFrom(actorUpdated));
     }
 
-    @GetMapping(value = "/actors")
+    @GetMapping(value = "/actors", produces = "application/json")
     public ResponseEntity<List<ActorDTO>> getActors() {
         List<Event> events = eventRepository.findAll();
         List<Actor> actors = actorRepository.findAll();
@@ -130,7 +132,8 @@ public class GithubApiRestController {
         List<ActorTuple> actorTuples = new ArrayList<>();
 
         for (Actor actor : actors) {
-            List<Event> collect = events.stream()
+            List<Event> collect = new ArrayList<>();
+            collect = events.stream()
                     .filter(event -> event.getActor().equals(actor))
                     .sorted(Comparator.comparing(Event::getCreatedAt).reversed())
                     .collect(Collectors.toList());
@@ -144,7 +147,7 @@ public class GithubApiRestController {
         return ResponseEntity.ok(actorList);
     }
 
-    @GetMapping(value = "/actors/streak")
+    @GetMapping(value = "/actors/streak", produces = "application/json")
     public ResponseEntity<List<ActorDTO>> getActorsStreak() {
         List<Event> events = eventRepository.findAll();
         List<Actor> actors = actorRepository.findAll();
@@ -152,7 +155,8 @@ public class GithubApiRestController {
         List<ActorTuple> actorTupleStreaks = new ArrayList<>();
 
         for (Actor actor : actors) {
-            List<Event> collect = events.stream()
+            List<Event> collect = new ArrayList<>();
+            collect = events.stream()
                     .filter(event -> event.getActor().equals(actor) && event.getType().equals("PushEvent"))
                     .sorted(Comparator.comparing(Event::getCreatedAt).reversed())
                     .collect(Collectors.toList());
