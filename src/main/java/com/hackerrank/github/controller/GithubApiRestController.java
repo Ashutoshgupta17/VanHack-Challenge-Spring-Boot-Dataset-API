@@ -124,7 +124,7 @@ public class GithubApiRestController {
         return ResponseEntity.ok(ActorDTO.convertFrom(actorUpdated));
     }
 
-    @GetMapping(value = "/actors")
+    @GetMapping(value = "/actors", produces = "application/json")
     public ResponseEntity<List<ActorDTO>> getActors() {
         List<Event> events = eventRepository.findAll();
         List<Actor> actors = actorRepository.findAll();
