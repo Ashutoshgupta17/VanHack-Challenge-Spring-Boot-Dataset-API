@@ -106,3 +106,18 @@ public class GithubApiRestController {
                                 .collect(Collectors.toList())
                 );
     }
+
+    @PutMapping(value = "/actors")
+    public ResponseEntity<ActorDTO> updateActorAvatarURL(@RequestBody ActorDTO body) {
+        Actor actor = actorRepository.findOne(body.getId());
+
+        if (Objects.isNull(actor)) {
+            return ResponseEntity.notFound().build();
+        }
+        if (!body.getLogin().equals(actor.getLogin())) {
+            return ResponseEntity.badRequest().build();
+        }
+        actor.setAvatar(body.getAvatar());
+        Actor actorUpdated = actorRepository.save(actor);
+        return ResponseEntity.ok(ActorDTO.convertFrom(actorUpdated));
+    }
