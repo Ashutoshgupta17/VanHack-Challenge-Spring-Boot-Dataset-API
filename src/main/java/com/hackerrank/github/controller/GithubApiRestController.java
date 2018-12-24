@@ -19,6 +19,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.temporal.ChronoField;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -52,7 +55,7 @@ public class GithubApiRestController {
     public ResponseEntity addEvent(@RequestBody EventDTO body) {
 
         if (Objects.nonNull(eventRepository.findOne(body.getId()))) {
-            ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().build();
         }
 
         ActorDTO actorDTO = body.getActor();
@@ -79,8 +82,7 @@ public class GithubApiRestController {
     @GetMapping(value = "/events", produces = "application/json")
     public ResponseEntity<List<EventDTO>> getAllEvents() {
 
-        List<Event> events = new ArrayList<>();
-        events = eventRepository.findAll(new Sort(Sort.Direction.ASC, "id"));
+        List<Event> events = eventRepository.findAll(new Sort(Sort.Direction.ASC, "id"));
 
         return events.isEmpty() ?
                 ResponseEntity.ok(new ArrayList<>()) :
@@ -97,8 +99,7 @@ public class GithubApiRestController {
         if (isNull(actor)) {
             return ResponseEntity.notFound().build();
         }
-        List<Event> events = new ArrayList<>();
-        events = eventRepository.findAllByActorIdOrderByIdAsc(actorID);
+        List<Event> events = eventRepository.findAllByActorIdOrderByIdAsc(actorID);
 
         return events.isEmpty() ?
                 ResponseEntity.ok(new ArrayList<>()) :
@@ -132,8 +133,7 @@ public class GithubApiRestController {
         List<ActorTuple> actorTuples = new ArrayList<>();
 
         for (Actor actor : actors) {
-            List<Event> collect = new ArrayList<>();
-            collect = events.stream()
+            List<Event> collect = events.stream()
                     .filter(event -> event.getActor().equals(actor))
                     .sorted(Comparator.comparing(Event::getCreatedAt).reversed())
                     .collect(Collectors.toList());
@@ -155,8 +155,7 @@ public class GithubApiRestController {
         List<ActorTuple> actorTupleStreaks = new ArrayList<>();
 
         for (Actor actor : actors) {
-            List<Event> collect = new ArrayList<>();
-            collect = events.stream()
+            List<Event> collect = events.stream()
                     .filter(event -> event.getActor().equals(actor) && event.getType().equals("PushEvent"))
                     .sorted(Comparator.comparing(Event::getCreatedAt).reversed())
                     .collect(Collectors.toList());
@@ -180,9 +179,15 @@ public class GithubApiRestController {
         for (int i = collect.size() - 1; i > 0; i--) {
             LocalDateTime currentDate = collect.get(i).getCreatedAt().toLocalDateTime();
             LocalDateTime nextDate = collect.get(i - 1).getCreatedAt().toLocalDateTime();
-            if (currentDate.plusDays(1).isBefore(nextDate)) {
+            LocalDateTime currentDateEndOfDay = currentDate.with(ChronoField.NANO_OF_DAY, LocalTime.MAX.toNanoOfDay());
+
+            long hours = ChronoUnit.HOURS.between(currentDate, nextDate);
+            long hoursFinalDay = ChronoUnit.HOURS.between(currentDate, currentDateEndOfDay);
+            long days = ChronoUnit.DAYS.between(currentDate, nextDate);
+
+            if (currentDate.getDayOfMonth() == nextDate.getDayOfMonth() || days > 1) {
                 streak = 0;
-            } else {
+            } else if (hours - hoursFinalDay <= 24) {
                 streak++;
                 if (streak > mayorStreak)
                     mayorStreak = streak;
