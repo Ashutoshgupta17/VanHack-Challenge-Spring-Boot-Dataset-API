@@ -174,9 +174,9 @@ public class GithubApiRestController {
         return ResponseEntity.ok(actorList);
     }
 
-    private Integer getStreak(List<Event> collect) {
-        Integer mayorStreak = 0;
-        Integer streak = 0;
+    private int getStreak(List<Event> collect) {
+        int mayorStreak = 0;
+        int streak = 0;
         for (int i = collect.size() - 1; i > 0; i--) {
             LocalDateTime currentDate = collect.get(i).getCreatedAt().toLocalDateTime();
             LocalDateTime nextDate = collect.get(i - 1).getCreatedAt().toLocalDateTime();
